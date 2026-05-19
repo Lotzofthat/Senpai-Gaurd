@@ -26,6 +26,7 @@ public final class PipelineRunner {
         TransformContext ctx = new TransformContext(cfg, jar);
         List<Transform> chain = new TransformRegistry(cfg).build();
         new TransformExecutor().runAll(chain, ctx);
+        rewriteManifestMainClass(jar, ctx.renameMap());
         new JarWriter().write(jar, output);
         if (cfg.writeMapping) {
             Path mappingPath = output.resolveSibling(output.getFileName().toString() + ".map");
@@ -50,5 +51,24 @@ public final class PipelineRunner {
             System.out.printf("  %-32s = %016x%n", e.getKey(), e.getValue());
         }
         return 0;
+    }
+
+    // jar Main-Class names use dotted form, the rename map keys internal slashed
+    // form. translate both ways so the rewritten manifest still launches.
+    private void rewriteManifestMainClass(LoadedJar jar, Map<String, String> renames) {
+        if (!jar.manifest().present) {
+            return;
+        }
+        var attrs = jar.manifest().manifest.getMainAttributes();
+        String current = attrs.getValue("Main-Class");
+        if (current == null) {
+            return;
+        }
+        String internal = current.replace('.', '/');
+        String mapped = renames.get(internal);
+        if (mapped == null) {
+            return;
+        }
+        attrs.putValue("Main-Class", mapped.replace('/', '.'));
     }
 }
