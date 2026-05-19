@@ -12,7 +12,7 @@ import senpai.pipeline.TransformContext;
 import senpai.util.NameGenerator;
 
 // despite the file name this pass owns two responsibilities the rename family
-// needs to finish: apply the accumulated method and field rename map to every
+// needs to finish, apply the accumulated method and field rename map to every
 // class, and rewrite local variable names. doing both in one walk avoids
 // rebuilding ClassNodes twice.
 public final class LocalVariableRenamer implements Transform {
