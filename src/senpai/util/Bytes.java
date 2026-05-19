@@ -16,7 +16,7 @@ public final class Bytes {
     // full rolled XOR with per byte rotation. each plaintext byte is xored
     // with the cycling key byte and with the prior ciphertext byte, then
     // rotated left by rot[i % rot.length] bits inside an 8 bit field. the
-    // decoder runs the inverse: rotate right first, then xor with the prior
+    // decoder runs the inverse, rotate right first, then xor with the prior
     // ciphertext byte, then xor with the key byte.
     public static byte[] rolledXor(byte[] payload, byte[] key, byte[] rot, byte seed) {
         if (key.length == 0 || rot.length == 0) {
