@@ -119,7 +119,7 @@ public final class DecoderInjector {
 
     private MethodNode buildDecoderMethod(ClassNode owner) {
         // private static String $sg$decode(int slot)
-        // locals:
+        // locals,
         //   0 slot (int)
         //   1 cipher (byte[])
         //   2 key (byte[])
@@ -143,7 +143,7 @@ public final class DecoderInjector {
         LabelNode loopExit = new LabelNode();
         LabelNode notCached = new LabelNode();
 
-        // cache = $sg$cache; hit = cache[slot]; if (hit != null) return hit
+        // cache = $sg$cache. hit = cache[slot]. if (hit != null) return hit
         c.add(new FieldInsnNode(Opcodes.GETSTATIC, owner.name, LazyDecodeCache.CACHE_FIELD, LazyDecodeCache.CACHE_DESC));
         c.add(new VarInsnNode(Opcodes.ASTORE, 8));
         c.add(new VarInsnNode(Opcodes.ALOAD, 8));
@@ -212,30 +212,30 @@ public final class DecoderInjector {
         c.add(new InsnNode(Opcodes.BALOAD));
         c.add(InsnFactory.pushInt(7));
         c.add(new InsnNode(Opcodes.IAND));
-        // stack: rBits
+        // stack, rBits
         // unrotated = ((cipherByte >>> rBits) | (cipherByte << (8 - rBits))) & 0xFF
         // duplicate rBits because we need it twice
         c.add(new InsnNode(Opcodes.DUP));
-        // top: rBits, rBits
+        // top, rBits, rBits
         // compute cipherByte >>> rBits
         c.add(new VarInsnNode(Opcodes.ILOAD, 7));
         c.add(new InsnNode(Opcodes.SWAP));
         c.add(new InsnNode(Opcodes.IUSHR));
-        // stack: rBits, (cipherByte >>> rBits)
+        // stack, rBits, (cipherByte >>> rBits)
         c.add(new InsnNode(Opcodes.SWAP));
-        // stack: (cipherByte >>> rBits), rBits
+        // stack, (cipherByte >>> rBits), rBits
         c.add(InsnFactory.pushInt(8));
         c.add(new InsnNode(Opcodes.SWAP));
         c.add(new InsnNode(Opcodes.ISUB));
-        // stack: (cipherByte >>> rBits), (8 - rBits)
+        // stack, (cipherByte >>> rBits), (8 - rBits)
         c.add(new VarInsnNode(Opcodes.ILOAD, 7));
         c.add(new InsnNode(Opcodes.SWAP));
         c.add(new InsnNode(Opcodes.ISHL));
-        // stack: (cipherByte >>> rBits), (cipherByte << (8 - rBits))
+        // stack, (cipherByte >>> rBits), (cipherByte << (8 - rBits))
         c.add(new InsnNode(Opcodes.IOR));
         c.add(InsnFactory.pushInt(0xFF));
         c.add(new InsnNode(Opcodes.IAND));
-        // stack: unrotated
+        // stack, unrotated
         // xor with key byte and carry
         c.add(new VarInsnNode(Opcodes.ALOAD, 2));
         c.add(new VarInsnNode(Opcodes.ILOAD, 6));
@@ -251,9 +251,9 @@ public final class DecoderInjector {
         c.add(new InsnNode(Opcodes.IAND));
         c.add(new InsnNode(Opcodes.IXOR));
         c.add(new InsnNode(Opcodes.I2B));
-        // stack: plainByte
+        // stack, plainByte
         // stash plainByte into a temp slot, then BASTORE in the natural order.
-        // slot 7 was cipherByte; we no longer need it here, reuse it.
+        // slot 7 was cipherByte. we no longer need it here, reuse it.
         c.add(new VarInsnNode(Opcodes.ISTORE, 7));
         c.add(new VarInsnNode(Opcodes.ALOAD, 4));
         c.add(new VarInsnNode(Opcodes.ILOAD, 6));
