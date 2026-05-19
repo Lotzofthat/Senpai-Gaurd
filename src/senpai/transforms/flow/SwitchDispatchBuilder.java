@@ -34,6 +34,20 @@ public final class SwitchDispatchBuilder {
                 if (op == Opcodes.JSR || op == Opcodes.RET) {
                     return false;
                 }
+                if (op == Opcodes.LLOAD || op == Opcodes.LSTORE
+                    || op == Opcodes.DLOAD || op == Opcodes.DSTORE) {
+                    // long and double locals occupy two slots. once blocks
+                    // are reordered the verifier sees the second half slot
+                    // as uninitialized on at least one path, which is the
+                    // bug behind the bad_local_variable_type error. skip.
+                    return false;
+                }
+                if (op == Opcodes.IINC) {
+                    // IINC reads then writes a local that may not have been
+                    // defined along the dispatched path. cheapest correct
+                    // answer is to skip the method.
+                    return false;
+                }
             }
         }
         if (blocks.count() < 2) {
@@ -47,7 +61,7 @@ public final class SwitchDispatchBuilder {
         InsnList rebuilt = new InsnList();
         LabelNode dispatchHead = new LabelNode();
 
-        // prologue: state = id(0); goto dispatch
+        // prologue, state = id(0). goto dispatch
         rebuilt.add(InsnFactory.pushInt(plan.stateIdAt(0)));
         rebuilt.add(new VarInsnNode(Opcodes.ISTORE, stateLocal));
         rebuilt.add(dispatchHead);
@@ -163,7 +177,7 @@ public final class SwitchDispatchBuilder {
             Integer targetBlock = blocks.labelToIndex.get(target);
             if (targetBlock == null) {
                 // jump into the middle of a block we did not split on, or to a
-                // label we erased. fall back: keep the original jump.
+                // label we erased. fall back, keep the original jump.
                 out.add(terminator);
                 return;
             }
@@ -173,11 +187,11 @@ public final class SwitchDispatchBuilder {
                 out.add(new JumpInsnNode(Opcodes.GOTO, dispatchHead));
                 return;
             }
-            // conditional jump. shape becomes:
+            // conditional jump. shape becomes,
             //   <cond inverted skip>
             //   state = id(target)
             //   goto dispatch
-            //   skip:
+            //   skip,
             //   state = id(fallthrough)
             //   goto dispatch
             LabelNode skip = new LabelNode();
@@ -198,7 +212,7 @@ public final class SwitchDispatchBuilder {
             }
             return;
         }
-        // returns and throws are kept as-is; the dispatcher does not loop back.
+        // returns and throws are kept as-is. the dispatcher does not loop back.
         out.add(terminator);
     }
 
