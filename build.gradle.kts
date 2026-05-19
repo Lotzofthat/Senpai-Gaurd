@@ -32,6 +32,12 @@ java {
     }
 }
 
+sourceSets {
+    main {
+        java.setSrcDirs(listOf("src"))
+    }
+}
+
 tasks.test {
     useJUnitPlatform()
 }
@@ -39,9 +45,9 @@ tasks.test {
 tasks.jar {
     manifest {
         attributes(
-            "Main Class" to "senpai.cli.SenpaiMain",
-            "Implementation Title" to "Senpai Guard",
-            "Implementation Version" to project.version,
+            "Main-Class" to "senpai.cli.SenpaiMain",
+            "Implementation-Title" to "Senpai Guard",
+            "Implementation-Version" to project.version,
             "Motto" to "It's not like I want to protect your code or anything..."
         )
     }
