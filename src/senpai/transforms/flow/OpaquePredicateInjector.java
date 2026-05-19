@@ -48,7 +48,7 @@ public final class OpaquePredicateInjector implements Transform {
     }
 
     private void injectAtEntry(MethodNode method) {
-        // pattern: x = (int) System.nanoTime(); if ((x ^ x) != 0) { throw }
+        // pattern, x = (int) System.nanoTime(). if ((x ^ x) != 0) { throw }
         // x ^ x is provably zero, but System.nanoTime defeats verifier-time
         // folding. the dead branch throws so the verifier still accepts the
         // method body that follows (it sees a clean exit from the dead arm).
