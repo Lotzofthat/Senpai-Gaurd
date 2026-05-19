@@ -4,6 +4,8 @@
 
 A Java bytecode obfuscator built around a small composable transform pipeline.
 
+> "This is toy tier right now, seriously. But what do you expect? this is like day 1... but the codebase is here, the folders are here, its a matter of time."
+
 ## DEV NOTE 
 
 You are not allowed to use any code that was ai assisted, generated, etc. (I cant enforce it because you cant tell if code is ai or not) but I am asking,
