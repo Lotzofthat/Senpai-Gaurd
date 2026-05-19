@@ -94,7 +94,12 @@ public final class SenpaiConfig {
         }
 
         public static FlowOptions defaults() {
-            return new FlowOptions(true, true, 4096);
+            // flatten is off by default because the rewrite needs a full
+            // dataflow pass to correctly detect cross block local definitions,
+            // and we ship a conservative checker that refuses any method
+            // with long or double locals or IINC. opaque predicates are on
+            // because they are universally safe.
+            return new FlowOptions(false, true, 4096);
         }
     }
 
